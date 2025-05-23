@@ -1,0 +1,485 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
+<style>
+    .register-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        height: 100vh;
+        padding: 2% 5%;
+    }
+
+    .register-left,
+    .register-right {
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        color: #4d0a77;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-size: 1.2rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .btn {
+        background-color: #4d0a77;
+        color: white;
+        padding: 0.8rem 1.5rem;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn:hover {
+        background-color: #3c0763;
+    }
+
+ /* Estilos generales */
+.error-message {
+    color: red;
+    margin-top: 10px;
+}
+
+input {
+    width: 100%;
+}
+
+input[readonly] {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+#form-estudiante,
+#form-administrativo {
+    display: none;
+}
+
+.form-container {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Contenedor de los campos de dígitos (pin) */
+.pin-input-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+/* Estilos para los campos de dígitos de CI */
+.pin-input {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.pin-input:focus {
+    border-color: #4d0a77;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente */
+}
+
+/* Estilos para centrar el modal */
+#ciModal {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); /* Fondo semi-transparente */
+    display: flex;
+    justify-content: center; /* Centrado horizontal */
+    align-items: center; /* Centrado vertical */
+}
+
+/* Contenedor del contenido del modal */
+.modal-content {
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column; /* Alinea los elementos del modal en columna */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Botón para cerrar el modal */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Ajuste para que los 7 campos de CI entren en una fila */
+.ci-digit {
+    width: 40px; /* Ajuste para que entren los 7 dígitos en una fila */
+    height: 40px;
+    font-size: 24px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#ciError {
+    color: red;
+    margin-top: 10px;
+    display: none; /* Oculto por defecto */
+}
+
+
+</style>
+
+<div id="ciModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>Verificación de CI</h2>
+        <p>Ingresa tu CI para confirmar tu identidad:</p>
+    <!-- Contenido del modal aquí -->
+    <div class="ci-inputs">
+    <input type="text" class="ci-digit" maxlength="1">
+    <input type="text" class="ci-digit" maxlength="1">
+    <input type="text" class="ci-digit" maxlength="1">
+    <input type="text" class="ci-digit" maxlength="1">
+    <input type="text" class="ci-digit" maxlength="1">
+    <input type="text" class="ci-digit" maxlength="1">
+    <input type="text" class="ci-digit" maxlength="1">
+    </div>
+    <!-- Botón para verificar CI -->
+    <button style="margin-top: 10%;" id="verifyCIButton" class="btn">Verificar CI</button>
+    <div id="ciError" style="color: red; display: none;"></div> <!-- Mensaje de error -->
+</div>
+</div>
+
+
+<div class="register-container">
+    <div class="register-left">
+        <h1>Registrarse</h1>
+        <div class="form-group">
+            <label for="rol">Selecciona un rol</label>
+            <select style="height: 80px;" id="rol" class="form-control">
+                <option value="">--Selecciona un rol--</option>
+                <option value="estudiante">Estudiante</option>
+                <option value="administrativo">Administrativo</option>
+            </select>
+        </div>
+
+        <!-- Formulario de Estudiante -->
+        <div id="form-estudiante">
+            <form action="/signup/" method="post" class="form-split">
+                {% csrf_token %}
+              <div class="form-column">
+                <div class="form-group">
+                    <label for="estudiante">Selecciona un estudiante</label>
+                    <select style="height: 60px;" id="estudiante" name="nombre_estudiante" class="form-control">
+                        <option value="">--Selecciona un estudiante--</option>
+                        {% for estudiante in estudiantes %}
+                            <option value="{{ estudiante.id }}" data-telefono="{{ estudiante.telefono }}" data-direccion="{{ estudiante.direccion }}" data-genero="{{ estudiante.genero }}">
+                                {{ estudiante.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Dirección</label>
+                    <input type="text" id="address" name="address" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input type="text" id="phone" name="telefono" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+            </div>
+
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="age">Edad</label>
+                    <input type="text" id="age" name="age" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="gender">Género</label>
+                    <input type="text" id="gender" name="gender" readonly>
+                </div>
+
+                <div class="form-group">
+                    <label for="password1">Contraseña</label>
+                    <input type="password" id="password1" name="password1">
+                </div>
+
+                <div class="form-group">
+                    <label for="password2">Repite la contraseña</label>
+                    <input type="password" id="password2" name="password2">
+                </div>
+            </div>
+                <button style="margin-bottom: 5%;" type="submit" class="btn">REGISTRARSE COMO ESTUDIANTE</button>
+            </form>
+        </div>
+
+        <!-- Formulario de Administrativo -->
+        <div id="form-administrativo">
+            <form action="/register_admin/" method="post" class="form-split">
+                {% csrf_token %}
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="admin-name">Nombre</label>
+                    <input type="text" id="admin-name" name="admin_name" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="address-admin">Dirección</label>
+                    <input type="text" id="address-admin" name="address_admin" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telefono-admin">Teléfono</label>
+                    <input type="text" id="telefono-admin" name="telefono_admin" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email-admin">Correo electrónico</label>
+                    <input type="email" id="email-admin" name="email_admin" class="form-control" required>
+                </div>
+              </div>
+              <div class="form-column">
+                <div class="form-group">
+                    <label for="age-admin">Edad</label>
+                    <input type="text" id="age-admin" name="age_admin" class="form-control" required>
+                </div>
+            
+                <div class="form-group">
+                    <label for="gender-admin">Género</label>
+                    <select style="height: 70px;" class="form-control" id="gender-admin" name="gender_admin" required>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                      </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="password1-admin">Contraseña</label>
+                    <input type="password" id="password1-admin" name="password1_admin" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="password2-admin">Repite la contraseña</label>
+                    <input type="password" id="password2-admin" name="password2_admin" class="form-control" required>
+                </div>
+                <div class="g-recaptcha" data-sitekey="6LfHuXEqAAAAAB1n0o9awEru4QKgb0MygZcR1Hgl" data-action="LOGIN"></div>
+              </div>
+                <button style="margin-bottom: 5%;" type="submit" class="btn">REGISTRARSE COMO ADMINISTRATIVO</button>
+                
+            </form>
+
+        </div>
+    </div>
+</div>
+</div>
+<script>
+    document.getElementById('rol').addEventListener('change', function() {
+        const rolSeleccionado = this.value;
+        const formEstudiante = document.getElementById('form-estudiante');
+        const formAdministrativo = document.getElementById('form-administrativo');
+
+        if (rolSeleccionado === 'estudiante') {
+            formEstudiante.style.display = 'block';
+            formAdministrativo.style.display = 'none';
+        } else if (rolSeleccionado === 'administrativo') {
+            formEstudiante.style.display = 'none';
+            formAdministrativo.style.display = 'block';
+        } else {
+            formEstudiante.style.display = 'none';
+            formAdministrativo.style.display = 'none';
+        }
+    });
+
+    // Botón de registro de administrativo
+    document.getElementById('registrar-admin-btn').addEventListener('click', function() {
+        const pinModal = new bootstrap.Modal(document.getElementById('pinModal'));
+        pinModal.show();
+    });
+
+
+</script>
+<script>
+    // Mostrar el modal cuando se haga clic en "Registrarse"
+    document.querySelector('button[type="submit"]').addEventListener('click', function(event) {
+        event.preventDefault();
+        const estudianteId = document.getElementById('estudiante').value;
+
+        if (!estudianteId) {
+            alert('Por favor, selecciona un estudiante primero.');
+            return;
+        }
+
+        document.getElementById('ciModal').style.display = 'flex'; // Mostrar el modal
+    });
+
+    // Verificar el CI cuando se haga clic en "Verificar CI"
+    document.getElementById('verifyCIButton').addEventListener('click', function() {
+        const estudianteId = document.getElementById('estudiante').value;
+
+        if (!estudianteId) {
+            alert('Por favor, selecciona un estudiante primero.');
+            return;
+        }
+
+        // Obtener el CI ingresado en el modal
+        const ciDigits = Array.from(document.querySelectorAll('.ci-digit')).map(input => input.value).join('');
+
+        // Verificar el CI en el servidor
+        fetch(`/verify_ci/${estudianteId}/${ciDigits}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.valid) {
+                    // Cerrar el modal y enviar el formulario si el CI es correcto
+                    document.getElementById('ciModal').style.display = 'none';
+                    document.querySelector('form').submit();
+                } else {
+                    // Mostrar un mensaje de error si el CI es incorrecto
+                    document.getElementById('ciError').textContent = data.message; // Mostrar el mensaje de error
+                    document.getElementById('ciError').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error en la verificación del CI:', error);
+            });
+    });
+
+    // Funcionalidad para autoenfoque y desplazamiento automático entre campos del CI
+    document.querySelectorAll('.ci-digit').forEach((input, index, inputs) => {
+        input.addEventListener('input', (e) => {
+            if (e.target.value.length === 1) {
+                if (index < inputs.length - 1) {
+                    inputs[index + 1].focus(); // Mover al siguiente input
+                }
+            }
+        });
+
+        // Evitar que el modal se muestre al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('ciModal').style.display = 'none'; // Asegura que el modal esté oculto al cargar
+});
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+                inputs[index - 1].focus(); // Retroceder al anterior input
+            }
+        });
+    });
+
+    // Cerrar el modal al hacer clic en la "X"
+    document.getElementById('closeModal').addEventListener('click', function() {
+        document.getElementById('ciModal').style.display = 'none';
+    });
+
+    // Cerrar el modal si se hace clic fuera de él
+    window.addEventListener('click', function(event) {
+        if (event.target == document.getElementById('ciModal')) {
+            document.getElementById('ciModal').style.display = 'none';
+        }
+    });
+
+    // Manejo de cambio de rol para mostrar el formulario correspondiente
+    document.getElementById('rol').addEventListener('change', function() {
+        const rolSeleccionado = this.value;
+        const formEstudiante = document.getElementById('form-estudiante');
+        const formAdministrativo = document.getElementById('form-administrativo');
+
+        if (rolSeleccionado === 'estudiante') {
+            formEstudiante.style.display = 'block';
+            formAdministrativo.style.display = 'none';
+        } else if (rolSeleccionado === 'administrativo') {
+            formEstudiante.style.display = 'none';
+            formAdministrativo.style.display = 'block';
+        } else {
+            formEstudiante.style.display = 'none';
+            formAdministrativo.style.display = 'none';
+        }
+    });
+
+    // Código de estudiante (mantiene funcionalidad para seleccionar y cargar datos)
+    document.getElementById('estudiante').addEventListener('change', function() {
+        const estudianteId = this.value;
+
+        if (estudianteId) {
+            fetch(`/get_estudiante_info/${estudianteId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.log('Error:', data.error);
+                    } else {
+                        document.getElementById('address').value = data.direccion || '';
+                        document.getElementById('phone').value = data.telefono || '';
+                        document.getElementById('email').value = data.gmail || '';
+                        document.getElementById('age').value = data.edad || '';
+                        document.getElementById('gender').value = data.genero || '';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error en la solicitud:', error);
+                });
+        } else {
+            document.getElementById('address').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('age').value = '';
+            document.getElementById('gender').value = '';
+        }
+    });
+</script>
+
+
+{% endblock %}
+6Ld3_m4qAAAAAI8-r1wgadQoPDZrJMKFiYgdw0SV

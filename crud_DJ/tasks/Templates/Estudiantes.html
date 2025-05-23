@@ -1,0 +1,545 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- Modal de confirmación para archivar estudiante -->
+<div class="modal fade" id="confirmArchiveModal" tabindex="-1" aria-labelledby="confirmArchiveLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="confirmArchiveLabel">Confirmar Archivado</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              ¿Estás seguro de que quieres archivar a este estudiante?
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn btn-danger" id="confirmArchiveButton">Archivar</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+<!-- Modal para Confirmar Restauración -->
+<div class="modal fade" id="confirmRestoreModal" tabindex="-1" aria-labelledby="confirmRestoreModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="confirmRestoreModalLabel">Confirmar Restauración</h5>
+              <button type="button" class="btn-close" data-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+              ¿Estás seguro de que deseas restaurar a este estudiante?
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+              <button type="button" class="btn btn-success" id="confirmRestoreButton">Restaurar</button>
+          </div>
+      </div>
+  </div>
+</div>
+
+
+<div class="container mt-1"> 
+  <h2 class="titulo text-center">Estudiantes</h2>
+  <h3 class="subtitulo text-center">3ro de secundaria {{ clase.año }} - {{ clase.Nombre }}</h3>
+  
+  <div class="header d-flex justify-content-center gap-2 align-items-center">
+      <button class="btn btn-primary volver">
+          <a style="text-decoration: none; color: white;" href="{% url 'cursos' %}">Volver</a>
+      </button>
+      
+      <input type="text" name="buscar_nombre" placeholder="Buscar estudiante" class="buscar-estudiante" value="{{ buscar_nombre }}">
+
+      <select name="filtro_estado" class="filtro">
+          <option value="todos" {% if filtro_estado == "todos" %}selected{% endif %}>Todos</option>
+          <option value="activo" {% if filtro_estado == "activo" %}selected{% endif %}>Activo</option>
+          <option value="inactivo" {% if filtro_estado == "inactivo" %}selected{% endif %}>Inactivo</option>
+      </select>
+
+      <button class="btn btn-success agregar" data-toggle="modal" data-target="#agregarModal">+</button>
+  </div>
+
+  <table class="table table-striped mt-3 tabla-estudiantes">
+      <thead>
+          <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Edad</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+          </tr>
+      </thead>
+      <tbody>
+          {% for estudiante in estudiantes %}
+              <tr>
+                  <td>{{ forloop.counter }}</td>
+                  <td>{{ estudiante.nombre }}</td>
+                  <td>{{ estudiante.edad }}</td>
+                  <td>{{ estudiante.estado }}</td>
+                  <td>
+                      <button class="btn btn-info ver" data-toggle="modal" data-target="#verModal" data-id="{{ estudiante.id }}" 
+                              data-CI="{{ estudiante.CI }}" data-nombre="{{ estudiante.nombre }}" 
+                              data-edad="{{ estudiante.edad }}" data-genero="{{ estudiante.genero }}" 
+                              data-telefono="{{ estudiante.Telefono }}" data-gmail="{{ estudiante.Gmail }}" 
+                              data-direccion="{{ estudiante.Direccion }}">Ver</button>
+                              <button class="btn btn-warning editar" 
+                              data-toggle="modal" 
+                              data-target="#editarModal" 
+                              data-id="{{ estudiante.id }}" 
+                              data-curso-slug="{{ id }}">Editar</button>
+                      
+                      {% if estudiante.estado == "Activo" %}
+                      <!-- Mantén el resto del código igual -->
+                          <button class="btn btn-danger eliminar" data-curso-id="{{ id }}" data-id="{{ estudiante.id }}" data-toggle="modal" data-target="#confirmArchiveModal">Archivar</button>
+                      {% else %}
+                          <button class="btn btn-success restaurar" data-curso-id="{{ id }}" data-id="{{ estudiante.id }}" data-toggle="modal" data-target="#confirmRestoreModal">Restaurar</button>
+                      {% endif %}
+
+                      <a href="{% url 'Datos_Estadisticos' curso_id=id estudiante_id=estudiante.id %}">
+                          <button class="btn btn-outline-primary est">
+                              <img width="20px" src="https://cdn-icons-png.flaticon.com/512/2278/2278983.png" alt="Estadísticas">
+                          </button>
+                      </a>
+                  </td>
+              </tr>
+          {% empty %}
+              <tr>
+                  <td colspan="5" class="text-center">No hay estudiantes en esta clase.</td>
+              </tr>
+          {% endfor %}
+      </tbody>
+  </table>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      let estudianteId;
+      let cursoId;
+
+      // Configurar el botón de "Restaurar" para cada estudiante inactivo
+      document.querySelectorAll(".restaurar").forEach(button => {
+          button.addEventListener("click", function () {
+              estudianteId = this.getAttribute("data-id");
+              cursoId = this.getAttribute("data-curso-id");
+          });
+      });
+
+      // Confirmar restauración
+      document.getElementById("confirmRestoreButton").addEventListener("click", function () {
+          if (estudianteId && cursoId) {
+              // Generar la URL para restaurar usando los slugs
+              const url = `{% url 'restaurar_estudiante' curso_id='curso_slug' estudiante_id='estudiante_slug' %}`
+                  .replace('curso_slug', cursoId)
+                  .replace('estudiante_slug', estudianteId);
+
+              fetch(url, {
+                  method: 'POST',
+                  headers: {
+                      'X-CSRFToken': '{{ csrf_token }}',
+                      'Content-Type': 'application/json'
+                  },
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      $('#confirmRestoreModal').modal('hide');
+                      location.reload();
+                  } else {
+                      alert("Hubo un problema al restaurar al estudiante.");
+                  }
+              })
+              .catch(error => console.error("Error:", error));
+          }
+      });
+  });
+</script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      let estudianteId;
+      let cursoId;
+
+      // Captura el botón de "Archivar" para cada estudiante
+      document.querySelectorAll(".eliminar").forEach(button => {
+          button.addEventListener("click", function () {
+              estudianteId = this.getAttribute("data-id");
+              cursoId = this.getAttribute("data-curso-id");
+          });
+      });
+
+      // Confirmar archivado
+      document.getElementById("confirmArchiveButton").addEventListener("click", function () {
+          if (estudianteId && cursoId) {
+              // Generar la URL usando curso_id y estudiante_id como slugs
+              const url = `{% url 'archivar_estudiante' curso_id='curso_slug' estudiante_id='estudiante_slug' %}`
+                  .replace('curso_slug', cursoId)
+                  .replace('estudiante_slug', estudianteId);
+
+              fetch(url, {
+                  method: 'POST',
+                  headers: {
+                      'X-CSRFToken': '{{ csrf_token }}',
+                      'Content-Type': 'application/json'
+                  },
+              })
+              .then(response => response.json())
+              .then(data => {
+                  if (data.success) {
+                      // Cerrar el modal y recargar la página
+                      $('#confirmArchiveModal').modal('hide');
+                      location.reload();
+                  } else {
+                      alert("Hubo un problema al archivar al estudiante.");
+                  }
+              })
+              .catch(error => console.error("Error:", error));
+          }
+      });
+  });
+</script>
+
+<script>
+  // Redirigir con parámetros de búsqueda y filtro
+  document.querySelector('.buscar-estudiante').addEventListener('input', () => {
+      const buscar_nombre = document.querySelector('.buscar-estudiante').value;
+      const filtro_estado = document.querySelector('.filtro').value;
+      window.location.href = `{% url 'ver_estudiantes' id %}?buscar_nombre=${buscar_nombre}&filtro_estado=${filtro_estado}`;
+  });
+
+  document.querySelector('.filtro').addEventListener('change', () => {
+      const buscar_nombre = document.querySelector('.buscar-estudiante').value;
+      const filtro_estado = document.querySelector('.filtro').value;
+      window.location.href = `{% url 'ver_estudiantes' id %}?buscar_nombre=${buscar_nombre}&filtro_estado=${filtro_estado}`;
+  });
+</script>
+
+<style>
+  .btn.volver, .btn.agregar {
+      display: inline-block;
+      text-align: center;
+      margin: 0 10px;
+  }
+  .btn.volver a, .btn.agregar {
+      color: white;
+  }
+  .restaurar{
+  background-color: #b1b1b1;
+  }
+  .restaurar:hover{
+    background-color: #434343;
+  }
+</style>
+
+
+<!-- Modal -->
+<div class="modal fade" id="verModal" tabindex="-1" role="dialog" aria-labelledby="verModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="verModalLabel">Detalles del Estudiante</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Nombre:</strong> <span id="modalNombre"></span></p>
+        <p><strong>CI:</strong> <span id="modalCI"></span></p>        
+        <p><strong>Edad:</strong> <span id="modalEdad"></span></p>
+        <p><strong>Género:</strong> <span id="modalGenero"></span></p>
+        <p><strong>Teléfono:</strong> <span id="modalTelefono"></span></p>
+        <p><strong>Gmail:</strong> <span id="modalGmail"></span></p>
+        <p><strong>Dirección:</strong> <span id="modalDireccion"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- Modal para agregar estudiante -->
+<div class="modal fade" id="agregarModal" tabindex="-1" role="dialog" aria-labelledby="agregarModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="agregarModalLabel">Agregar Estudiante</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="formAgregarEstudiante" method="POST" action="{% url 'agregar_estudiante' id %}">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="CI">CI</label>
+              <input type="text" class="form-control" id="CI" name="CI" required>
+            </div>
+            <div class="form-group">
+              <label for="nombre">Nombre</label>
+              <input type="text" class="form-control" id="nombre" name="nombre" required>
+            </div>
+            <div class="form-group">
+              <label for="edad">Edad</label>
+              <input type="number" class="form-control" id="edad" name="edad" required>
+            </div>
+            <div class="form-group">
+              <label for="genero">Género</label>
+              <select class="form-control" id="genero" name="genero" required>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="telefono">Teléfono</label>
+              <input type="text" class="form-control" id="telefono" name="telefono">
+            </div>
+            <div class="form-group">
+              <label for="gmail">Gmail</label>
+              <input type="text" class="form-control" id="gmail" name="gmail">
+            </div>
+            <div class="form-group">
+              <label for="direccion">Dirección</label>
+              <input type="text" class="form-control" id="direccion" name="direccion">
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Guardar</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            </div>
+          </form>
+        </div>
+ 
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+
+
+
+<!-- Modal para editar estudiante -->
+<div class="modal fade" id="editarModal" tabindex="-1" role="dialog" aria-labelledby="editarModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editarModalLabel">Editar Estudiante</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="formEditarEstudiante" method="POST" action="">
+            {% csrf_token %}
+            <div class="form-group">
+              <label for="CI_ed">CI</label>
+              <input type="text" class="form-control" id="CI_ed" name="CI_ed" required>
+            </div>
+            <div class="form-group">
+              <label for="nombre_ed">Nombre</label>
+              <input type="text" class="form-control" id="nombre_ed" name="nombre_ed" required>
+            </div>
+            <div class="form-group">
+              <label for="edad_Ed">Edad</label>
+              <input type="number" class="form-control" id="edad_Ed" name="edad_Ed" required>
+            </div>
+            <div class="form-group">
+              <label for="genero_ed">Género</label>
+              <select class="form-control" id="genero_ed" name="genero_ed" required>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+              </select>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Guardar</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+
+<style>
+    .header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .volver {
+        background-color: #b83333;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .buscar-estudiante {
+        flex: 1;
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .filtro {
+        padding: 10px;
+        border-radius: 5px;
+    }
+    .agregar {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        padding: 10px;
+        border-radius: 50%;
+    }
+    .titulo {
+        color: #4d004d;
+        text-align: center;
+    }
+    .subtitulo {
+        color: #4d004d;
+        text-align: center;
+    }
+    .tabla-estudiantes {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .tabla-estudiantes th, .tabla-estudiantes td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+    .btn {
+        text-decoration: none;
+        padding: 5px 10px;
+        margin: 2px;
+        border-radius: 5px;
+        border: none;
+    }
+    .ver {
+        background-color: #4caf50;
+        color: white;
+    }
+    .editar {
+        background-color: #ffa500;
+        color: white;
+    }
+    .eliminar {
+        background-color: #b83333;
+        color: white;
+    }
+    .archivar {
+        background-color: #8c8c8c;
+        color: white;
+    }
+    .est{
+      background-color: #94d1c1;
+    }
+</style>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $('#verModal').on('show.bs.modal', function (event) {
+      var button = $(event.relatedTarget) 
+      var nombre = button.data('nombre') 
+      var CI = button.data('ci')
+      var edad = button.data('edad') 
+      var genero = button.data('genero') 
+      var telefono = button.data('telefono')
+      var gmail = button.data('gmail')
+      var direccion = button.data('direccion')
+      var modal = $(this)
+      modal.find('#modalNombre').text(nombre)
+      modal.find('#modalCI').text(CI)
+      modal.find('#modalEdad').text(edad)
+      modal.find('#modalGenero').text(genero)
+      modal.find('#modalTelefono').text(telefono)
+      modal.find('#modalGmail').text(gmail)
+      modal.find('#modalDireccion').text(direccion)
+    })
+</script>
+<script>
+  document.getElementById("formEditarEstudiante").addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const cursoId = "{{ id }}"; // ID del curso
+    const estudianteId = document.querySelector(".editar[data-id]").getAttribute("data-id"); // ID del estudiante
+
+    const url = `/editar_estudiante/${cursoId}/${estudianteId}/`;
+
+    // Recoger datos del formulario
+    const data = {
+      CI: document.getElementById("CI_ed").value,
+      nombre: document.getElementById("nombre_ed").value,
+      edad: document.getElementById("edad_Ed").value,
+      genero: document.getElementById("genero_ed").value,
+    };
+
+    // Enviar datos al servidor
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert(data.message);
+          // Actualizar la tabla o recargar la página
+          location.reload();
+        } else {
+          alert("Error al actualizar: " + data.message);
+        }
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        alert("Ocurrió un error inesperado al enviar los datos");
+      });
+  });
+</script>
+
+<script>
+  document.querySelectorAll(".editar").forEach(button => {
+    button.addEventListener("click", function () {
+      const cursoSlug = this.getAttribute("data-curso-slug"); // Slug del curso
+      const estudianteSlug = this.getAttribute("data-id"); // Slug del estudiante
+
+      // Hacer una solicitud GET al servidor para obtener los datos del estudiante
+      fetch(`/cargar_estudiante/${cursoSlug}/${estudianteSlug}/`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // Llenar el formulario con los datos del estudiante
+            const estudiante = data.data;
+
+            document.getElementById("CI_ed").value = estudiante.CI || "";
+            document.getElementById("nombre_ed").value = estudiante.nombre || "";
+            document.getElementById("edad_Ed").value = estudiante.edad || "";
+            document.getElementById("genero_ed").value = estudiante.genero || "";
+          } else {
+            alert("Error al cargar datos: " + data.message);
+          }
+        })
+        .catch(error => {
+          console.error("Error:", error);
+          alert("Ocurrió un error inesperado al cargar los datos");
+        });
+    });
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,26 @@
+<form action="{% url 'agregar_estudiante' id %}" method="POST">
+
+    {% csrf_token %}
+    <div class="form-group row">
+        <label for="Id">Id</label>
+        <input type="text" class="form-control" name="Id" id="Id" required>
+    </div>
+    <div class="form-group row">
+        <label for="nombre">Nombre</label>
+        <input type="text" class="form-control" name="nombre" id="nombre" required>
+    </div>
+    <div class="form-group row">
+        <label for="edad">Edad</label>
+        <input type="text" class="form-control" name="edad" id="edad" required>
+    </div>
+    <div class="form-group row">
+        <label for="genero">Género</label>
+        <input type="text" class="form-control" name="genero" id="genero" required>
+    </div>
+    <div class="form-group row">
+        <label for="estado">Estado</label>
+        <input type="text" class="form-control" name="estado" id="estado" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <a href="{% url 'Estudiantes' id %}" class="btn btn-primary">Cancel</a>
+</form>

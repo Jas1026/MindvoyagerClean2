@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindVoyager</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<style>
+    .cerrarButton:hover{
+        text-decoration: none;
+        color: white;
+    }
+    .icon-img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .navbar {
+        align-content: center;
+        padding: 10px;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    .navbar-nav {
+    margin: 0 auto; /* Centrar horizontalmente */
+    display: flex;
+    justify-content: center; /* Asegura que los elementos se alineen al centro */
+    flex-direction: row;
+    }   
+    .nav-link {
+        font-size: 1.2rem;
+        color: #6c757d;
+        margin: 0 10px;
+        padding: 12px 24px;
+        text-align: center;
+        background-color: #f2f2f2;
+        border-radius: 12px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        display: block;
+        border: 1px solid transparent;
+    }
+
+    .nav-link.active {
+        background-color: #e0bbff;
+        color: #6a1b9a;
+        font-weight: bold;
+        border-color: #6a1b9a;
+    }
+
+    .nav-link:hover {
+        background-color: #d6a7ff;
+        color: #5d1587;
+    }
+
+    .nav-item {
+        align-items: center;
+        margin: 0 10px;
+    }
+
+    .navbar-toggler {
+        border-color: #6a1b9a;
+    }
+
+    .navbar-toggler-icon {
+        background-color: #6a1b9a;
+    }
+
+    @media (max-width: 992px) {
+        .navbar-nav {
+            text-align: center;
+        }
+
+        .navbar-collapse {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-link {
+            margin: 5px 0;
+            padding: 10px;
+        }
+        .logout-btn {
+            margin-top: 20px;
+        }
+    }
+</style>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <!-- Left icons -->
+            <div class="d-flex align-items-center">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQxjDndn8mRmduopXK2xz_Rqx468-iPNJIxjYlv_92lSIHzGu3oUlJHgQPilFnVcsk0pCg&usqp=CAU" alt="Icono 1" class="icon-img">
+            </div>
+            <!-- Center title -->
+            <a class="navbar-brand mx-auto" href="#">MINDVOYAGER</a>
+    
+            <!-- Toggle button for mobile -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+    
+            <!-- Right content -->
+            {% if request.session.role %}
+                <div class="logout-btn">
+                    <button class="btn btn-outline-danger my-2 my-sm-0" type="button">
+                        <a href="/logout" style="text-decoration: none; color: black;" class="cerrarButton">Cerrar sesión</a>
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </nav>
+    
+    <!-- Collapsible menu -->
+    <nav class="navbar navbar-expand-lg justify-content-center mt-3">
+        <div class="collapse navbar-collapse" id="navbarMenu">
+                <ul class="navbar-nav">
+                    {% if request.session.role %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/task/' %}active{% endif %}" href="/task">Inicio</a>
+                    </li>
+                        {% if request.session.role == 'administrativo' %}
+
+                        <li class="nav-item">
+                            <a class="nav-link {% if '/Cursos/' in request.path or '/Estudiantes/' in request.path or '/Datos_Estadisticos/' in request.path %}active{% endif %}" href="/Cursos">Cursos</a>
+                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.path == '/Resumen/' %}active{% endif %}" href="/Resumen">Resumen</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.path == '/CasosCriticos/' %}active{% endif %}" href="/CasosCriticos">Casos críticos</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.path == '/Niveles/' %}active{% endif %}" href="/Niveles">Niveles</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.path == '/Administrativos_permiso/' %}active{% endif %}" href="/Administrativos_permiso">Permiso de acceso</a>
+                            </li>
+                        {% elif request.session.role == 'estudiante' %}
+
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.path == '/Detall_Niveles/' %}active{% endif %}" href="/Detall_Niveles">Sugerencias</a>
+                            </li>
+                        {% endif %}
+
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/miPerfil/' %}active{% endif %}" href="/miPerfil">Mi Perfil</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/home/' %}active{% endif %}" href="/home">Inicio</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/signup/' %}active{% endif %}" href="/signup">Registro</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/signin/' %}active{% endif %}" href="/signin">Iniciar Sesión</a>
+                        </li>
+                    {% endif %}
+                </ul>
+        </div>
+    </nav>
+    
+    
+
+    {% block content %}
+    {% endblock %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

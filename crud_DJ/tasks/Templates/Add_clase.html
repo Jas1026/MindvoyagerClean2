@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<body>
+    <div class="form-container" style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+        <h2 style="text-align: center; background-color: #5e3a8c; color: white; padding: 10px; border-radius: 8px 8px 0 0;">Cursos</h2>
+
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="Nombre">Nombre</label>
+                <input type="text" class="form-control" name="Nombre" id="Nombre" value="{{ clase.Nombre }}" placeholder="Ingrese el nombre del curso" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="año">Año</label>
+                <input type="text" class="form-control" name="año" id="año" value="{{ clase.año }}" placeholder="Seleccione el año" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label for="Estado">Estado</label>
+                <select name="Estado" id="Estado" class="form-control" style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <option value="Activo" {% if clase.Estado == "Activo" %}selected{% endif %}>Activo</option>
+                    <option value="Inactivo" {% if clase.Estado == "Inactivo" %}selected{% endif %}>Inactivo</option>
+                </select>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                <button type="submit" class="btn" style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px;">Guardar</button>
+                <a href="/Cursos/" class="btn" style="background-color: #f44336; color: white; padding: 10px 20px; border: none; border-radius: 4px; text-decoration: none;">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('año');
+        const datepicker = new Datepicker(input, {
+            format: 'yyyy',
+            minViewMode: 2, // Permite seleccionar solo el año
+            autohide: true
+        });
+    });
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.4/dist/css/datepicker.min.css">
+<script src="https://cdn.jsdelivr.net/npm/vanillajs-datepicker@1.1.4/dist/js/datepicker-full.min.js"></script>
+
+{% endblock %}

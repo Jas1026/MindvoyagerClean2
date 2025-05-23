@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .container {
+        height: 70; /* Altura completa de la ventana */
+        display: flex;
+        align-items: center; /* Alinear verticalmente */
+        justify-content: center; /* Alinear horizontalmente */
+        text-align: center; /* Alinear texto en el centro */
+    }
+    .img-fluid{
+        width: 70%;
+    }
+</style>
+
+<div class="container">
+    <div class="row">
+        <!-- Sección de bienvenida -->
+        <div class="col-md-6 d-flex flex-column justify-content-center">
+            <h1>Bienvenido, {{ role }}: {{ username }}</h1>
+            <p>Estamos felices de verte aquí.</p>
+        </div>
+
+        <!-- Sección de imagen según el rol -->
+        <div class="col-md-6 text-center">
+            {% if role == 'administrativo' %}
+                <img src="https://potenciapsicologia.com.br/wp-content/uploads/2021/10/como-funciona-a-terapia-1-1.png" alt="Imagen Administrador" class="img-fluid">
+            {% elif role == 'estudiante' %}
+                <img src="https://i.postimg.cc/MHH32yp6/Dise-o-sin-t-tulo.jpg" alt="Imagen Estudiante" class="img-fluid">
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

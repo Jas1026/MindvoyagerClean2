@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-1"> 
+<form method="GET" action="" class="mb-4">
+    <div class="row">
+        <!-- Filtro por Texto -->
+        <div class="col-md-4">
+            <div class="input-group">
+                <label for="busqueda" class="input-group-text">Buscar:</label>
+                <input type="text" class="form-control" name="busqueda" id="busqueda" value="{{ busqueda }}" placeholder="Buscar por nombre o año">
+                <button type="submit" style="background-color: #ddd;" class="btn btn-secondary"><img src="https://cdn-icons-png.flaticon.com/512/6412/6412166.png" width="30px"></button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<table class="tabla-estudiantes">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Gmail</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for administrativo in Administrativos %}
+        {% if administrativo.Estado == "Inactivo" %}
+            <tr>
+                <td>{{ administrativo.Nombre }} - {{ administrativo.Gmail }}</td>
+                <td>{{ administrativo.Gmail }}</td>
+                <td>
+                    <button class="btn ver" 
+                    data-toggle="modal" 
+                    data-target="#verModal" 
+                    data-id="{{ administrativo.Id }}" 
+                    data-nombre="{{ administrativo.Nombre }}" 
+                    data-genero="{{ administrativo.genero }}" 
+                    data-telefono="{{ administrativo.Telefono }}" 
+                    data-gmail="{{ administrativo.Gmail }}" 
+                    data-direccion="{{ administrativo.Direccion }}">
+                    Ver
+                    </button>
+                    
+                    <!-- Botón para aceptar administrativo con confirmación -->
+                    <button class="btn aceptar" 
+                    data-toggle="modal" 
+                    data-target="#confirmModal" 
+                    data-id="{{ administrativo.Id }}" 
+                    data-action="aceptar"
+                    data-nombre="{{ administrativo.Nombre }}">
+                    Aceptar
+                    </button>
+                    
+                    <!-- Botón para eliminar administrativo con confirmación -->
+                    <button class="btn eliminar" 
+                    data-toggle="modal" 
+                    data-target="#confirmModal" 
+                    data-id="{{ administrativo.Id }}" 
+                    data-action="eliminar"
+                    data-nombre="{{ administrativo.Nombre }}">
+                    Eliminar
+                    </button>
+                </td>
+            </tr>
+        {% endif %}
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Modal para Ver Detalles -->
+<div class="modal fade" id="verModal" tabindex="-1" role="dialog" aria-labelledby="verModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="verModalLabel">Detalles del administrativo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Nombre:</strong> <span id="modalNombre"></span></p>
+                <p><strong>Género:</strong> <span id="modalGenero"></span></p>
+                <p><strong>Teléfono:</strong> <span id="modalTelefono"></span></p>
+                <p><strong>Gmail:</strong> <span id="modalGmail"></span></p>
+                <p><strong>Dirección:</strong> <span id="modalDireccion"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmación para Aceptar o Eliminar -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Confirmar acción</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">¿Estás seguro de que deseas realizar esta acción?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <a href="#" id="confirmAction" class="btn btn-danger">Confirmar</a>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<!-- Estilos -->
+<style>
+    .tabla-estudiantes {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .tabla-estudiantes th, .tabla-estudiantes td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+    .btn {
+        text-decoration: none;
+        padding: 5px 10px;
+        margin: 2px;
+        border-radius: 5px;
+        border: none;
+    }
+    .ver {
+        background-color: #4caf50;
+        color: white;
+    }
+    .aceptar {
+        background-color: #feb43c;
+        color: white;
+    }
+    .eliminar {
+        background-color: #b83333;
+        color: white;
+    }
+</style>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Modal para ver detalles
+    $('#verModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var nombre = button.data('nombre');
+        var genero = button.data('genero');
+        var telefono = button.data('telefono');
+        var gmail = button.data('gmail');
+        var direccion = button.data('direccion');
+
+        var modal = $(this);
+        modal.find('#modalNombre').text(nombre);
+        modal.find('#modalGenero').text(genero);
+        modal.find('#modalTelefono').text(telefono);
+        modal.find('#modalGmail').text(gmail);
+        modal.find('#modalDireccion').text(direccion);
+    });
+
+    // Modal de confirmación
+    $('#confirmModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var action = button.data('action');
+        var id = button.data('id');
+        var nombre = button.data('nombre');
+        var modal = $(this);
+
+        // Cambiar el mensaje y la URL del botón según la acción
+        var actionUrl = '';
+        var message = '';
+
+        if (action === 'aceptar') {
+            actionUrl = "{% url 'aceptar_administrativo' 0 %}".replace('0', id);
+            message = '¿Estás seguro de que deseas aceptar a ' + nombre + '?';
+        } else if (action === 'eliminar') {
+            actionUrl = "{% url 'eliminar_administrativo' 0 %}".replace('0', id);
+            message = '¿Estás seguro de que deseas eliminar a ' + nombre + '?';
+        }
+
+        modal.find('#modalMessage').text(message);
+        modal.find('#confirmAction').attr('href', actionUrl);
+    });
+});
+</script>
+
+{% endblock %}

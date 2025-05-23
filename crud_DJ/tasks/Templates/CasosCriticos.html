@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 style="text-align: center; color: #4d004d; margin-top: 30px;">Casos Críticos</h1>
+<style>
+       .tabla-estudiantes {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+    .tabla-estudiantes th, .tabla-estudiantes td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: center;
+    }
+    .btn {
+        text-decoration: none;
+        padding: 5px 10px;
+        margin: 2px;
+        border-radius: 5px;
+        border: none;
+    }
+    .ver {
+        background-color: #4caf50;
+        color: white;
+    }
+    .editar {
+        background-color: #ffa500;
+        color: white;
+    }
+    .eliminar {
+        background-color: #b83333;
+        color: white;
+    }
+    .archivar {
+        background-color: #8c8c8c;
+        color: white;
+    }
+    .est{
+      background-color: #94d1c1;
+    }
+</style>
+<table class="tabla-estudiantes">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>CI</th>
+            <th>Género</th>
+            <th>Probabilidad 1 Año (%)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for estudiante in estudiantes %}
+        <tr>
+            <td>{{ estudiante.nombre }}</td>
+            <td>{{ estudiante.CI }}</td>
+            <td>{{ estudiante.genero }}</td>
+            <td>{{ estudiante.probabilidad_1año }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

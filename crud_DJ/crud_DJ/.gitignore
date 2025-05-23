@@ -1,0 +1,16 @@
+# Entorno virtual
+venv/
+.venv/
+
+# Archivos de entorno
+.env
+
+# Archivos y carpetas grandes
+*.pyc
+__pycache__/
+.ipynb_checkpoints/
+*.sqlite3
+*.h5
+# Ignorar entorno virtual
+env/
+.venv/

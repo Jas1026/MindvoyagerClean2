@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="all">
+<!-- Contenedor para los gráficos de promedios -->
+<div class="graficos-promedios">
+    <div class="grafico-promedio-container">
+        <h2>Promedio de Probabilidades por Curso</h2>
+        <img src="{{ grafico_barras_promedios }}" alt="Gráfico de barras de promedios por curso">
+    </div>
+    <div class="grafico-promedio-container">
+        <h2>Comparativa de Probabilidades por curso</h2>
+        <img src="{{ grafico_lineas_promedios }}" alt="Gráfico de líneas de promedios por curso">
+    </div>
+</div>
+<h1>Resumen estadístico por curso</h1>
+<!-- Gráficos individuales por curso -->
+<div class="cursos">
+    {% for curso in cursos %}
+        <div class="curso-container">
+            <div class="curso-header">
+                <h2>{{ curso.nombre }}</h2>
+            </div>
+
+            <!-- Imagen del gráfico -->
+            <div class="grafico-barra-container">
+                <img id="grafico-barra-{{ forloop.counter }}" 
+                     src="{{ curso.grafico_1_año }}" 
+                     data-src-1="{{ curso.grafico_1_año }}" 
+                     data-src-3="{{ curso.grafico_3_años }}" 
+                     data-src-5="{{ curso.grafico_5_años }}" 
+                     alt="Gráfico de {{ curso.nombre }}">
+            </div>
+
+            <!-- Selector de probabilidad -->
+            <div class="probabilidad-select">
+                <label for="select-año-{{ forloop.counter }}">Selecciona la probabilidad de:</label>
+                <select id="select-año-{{ forloop.counter }}" class="select-probabilidad" onchange="actualizarGrafico('{{ forloop.counter }}')">
+                    <option value="1">1 Año</option>
+                    <option value="3">3 Años</option>
+                    <option value="5">5 Años</option>
+                </select>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+</div>
+<script>
+    function actualizarGrafico(cursoIndex) {
+        const selectElement = document.getElementById(`select-año-${cursoIndex}`);
+        const selectedValue = selectElement.value;
+        
+        const imgElement = document.getElementById(`grafico-barra-${cursoIndex}`);
+        
+        // Actualiza la imagen según la selección
+        if (selectedValue === "1") {
+            imgElement.src = imgElement.getAttribute("data-src-1");
+        } else if (selectedValue === "3") {
+            imgElement.src = imgElement.getAttribute("data-src-3");
+        } else if (selectedValue === "5") {
+            imgElement.src = imgElement.getAttribute("data-src-5");
+        }
+    }
+</script>
+<style>
+.all{
+    margin: 30px;
+}
+    .graficos-promedios {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        gap: 10px; /* Reduce la separación entre los gráficos */
+    }
+    
+    .grafico-promedio-container {
+        width: 50%;
+        box-sizing: border-box;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fff;
+    }
+
+    .grafico-promedio-container img {
+        width: 100%;
+        height: auto;
+    }
+
+    .cursos {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .curso-container {
+        width: calc(50% - 10px);
+        box-sizing: border-box;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .curso-header {
+        background-color: #4A148C; /* Color morado */
+        color: white;
+        padding: 10px;
+        border-radius: 8px 8px 0 0;
+    }
+
+    .curso-header h2 {
+        margin: 0;
+    }
+    
+    .probabilidad-select {
+        margin-top: 10px;
+    }
+    
+    .grafico-barra-container img {
+        width: 100%;
+        height: auto;
+        margin-top: 10px;
+    }
+</style>
+
+{% endblock %}

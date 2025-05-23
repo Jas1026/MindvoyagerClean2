@@ -1,0 +1,192 @@
+{% extends 'base.html' %} 
+
+{% block content %}
+<style>
+    .nombre-centro {
+        color: #4d004d;
+        text-align: center;
+        font-size: 24px;
+        margin-bottom: 30px;
+    }
+    .comportamientos {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+    }
+    .comportamiento {
+        text-align: center;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        width: 180px;
+        padding: 10px;
+    }
+    .comportamiento h4 {
+        background-color: #6a1b9a;
+        color: white;
+        padding: 8px 0;
+        font-size: 16px;
+        margin: 0;
+        border-radius: 8px 8px 0 0;
+    }
+    .chart-container {
+        width: 160px;
+        height: 160px;
+        position: relative;
+        margin: 10px auto;
+    }
+    .probabilidad-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .probabilidad-select {
+        display: flex;
+        align-items: center;
+        border: 2px solid #4d004d;
+        border-radius: 10px;
+        padding: 8px;
+        font-size: 16px;
+        background-color: #f2f2f2;
+    }
+    .probabilidad-output-container {
+        display: flex;
+        align-items: center;
+        border: 2px solid #4d004d;
+        border-radius: 10px;
+        padding: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        color: #4d004d;
+        background-color: #eae6f0;
+    }
+    .line-chart-container {
+        display: flex;
+        align-items: center;
+        border: 2px solid #4d004d;
+        border-radius: 10px;
+        padding: 10px;
+        background-color: #eae6f0;
+    }
+    .barra-bloque {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 90%;
+        margin: 20px auto;
+        padding: 20px;
+        border: 2px solid #4d004d;
+        border-radius: 10px;
+        background-color: #f9f2f9;
+    }
+    .barra-titulo {
+        color: #4d004d;
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .barra-grafico, .barra-texto {
+        width: 45%;
+    }
+    .barra-texto p {
+        margin-left: 20px;
+        text-align: justify;
+        color: #333;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+</style>
+
+<body>
+    <h1 class="nombre-centro" style="margin-top: 20px;">
+       Nombre del estudiante: {{ nombre_estudiante }}
+    </h1>
+
+    <div class="probabilidad-container">
+        <div class="probabilidad-select">
+            <label for="select-año">Selecciona la probabilidad de:</label>
+            <select id="select-año">
+                <option value="1">1 Año</option>
+                <option value="3">3 Años</option>
+                <option value="5">5 Años</option>
+            </select>
+        </div>
+        <div class="probabilidad-output-container" id="probabilidad-valor">
+            {{ prob_1_año }}%
+        </div>
+        <div class="line-chart-container">
+            <img id="grafico-dona" src="data:image/png;base64,{{ grafico_dona_1_año }}" alt="Gráfico de probabilidad en dona" width="160px"/>
+        </div>
+    </div>
+
+    <div class="comportamientos">
+        {% for comportamiento, grafico in graficos.items %}
+            <div class="comportamiento">
+                <h4>{{ comportamiento }}</h4>
+                <img src="data:image/png;base64,{{ grafico }}" alt="{{ comportamiento }}" class="chart-container" />
+            </div>
+        {% endfor %}
+    </div>
+    
+    <h1 style="margin-top: 20px;" class="nombre-centro">Comparaciones de Comportamientos</h1>
+        <!-- Bloque de gráficos de barras -->
+    <div class="barra-bloque">
+        <div class="barra-titulo">Primer Nivel</div>
+        <div class="barra-grafico">
+            <img src="data:image/png;base64,{{  grafico_barras_impulsividad_paranoia }}" alt="Gráfico de impulsividad y paranoia" width="100%">
+        </div>
+        <div class="barra-texto">
+            <p>La impulsividad es la tendencia a actuar sin prever las consecuencias a largo plazo, en respuesta a deseos o emociones intensas. En el contexto del TLP tipo B, la impulsividad puede llevar a comportamientos autodestructivos, como abuso de sustancias, conductas riesgosas y dificultades en el manejo de relaciones. </p>
+            <p>La paranoia implica desconfianza extrema y la creencia de que otros intentan dañarte o engañarte. Las personas con TLP tipo B pueden experimentar episodios de paranoia transitoria, especialmente en momentos de estrés.</p>
+            <p style="color: red; font-size: 20px;">Sugerencia:</p>
+            <p>Para la impulsividad, se recomienda trabajar en técnicas de control de impulsos, como la toma de decisiones conscientes y la práctica de la paciencia.</p>
+            <p>Para la paranoia, es importante desarrollar estrategias que fomenten la confianza en uno mismo y en los demás. Trabajar en una comunicación abierta y sincera con personas cercanas puede ayudar a reducir la paranoia.</p>
+        </div>
+    </div>
+    <div class="barra-bloque">
+        <div class="barra-titulo">Segundo Nivel</div>
+        <div class="barra-grafico">
+            <img src="data:image/png;base64,{{ grafico_barras_tlp_narcisismo }}" alt="Gráfico de TLP y narcisismo" width="100%">
+        </div>
+        <div class="barra-texto">
+            <p>El TLP es un subtrastorno que afecta la autoimagen, el control emocional y la capacidad de establecer relaciones estables. Las personas con TLP tienden a experimentar emociones extremas y relaciones intensas y breves. Dentro de la categoría tipo B, el TLP enfatiza la dificultad para manejar el rechazo.</p>
+            <p>El narcisismo se caracteriza por un sentido exagerado de la propia importancia, necesidad de admiración y falta de empatía. En el TLP tipo B, el narcisismo contribuye a la inestabilidad emocional y a una necesidad constante de validación, que a menudo se manifiesta en actitudes manipulativas y en dificultad para aceptar críticas.</p>
+            <p style="color: red;font-size: 20px;">Sugerencia:</p>
+            <p>Para reducir conductas narcisistas, se sugiere enfocarse en la empatía y en el desarrollo de una perspectiva equilibrada en las relaciones. Practicar la gratitud y reflexionar sobre las necesidades de los demás puede contribuir a un sentido de autovaloración más saludable.</p>
+            <p>Para TLP, se recomienda buscar apoyo en el manejo emocional y la regulación de las relaciones. Técnicas de terapia dialéctica conductual pueden ser útiles para mejorar la estabilidad emocional, así como desarrollar habilidades para enfrentar el estrés.</p>
+        </div>
+    </div>
+    <div class="barra-bloque">
+        <div class="barra-titulo">Tercer Nivel</div>
+        <div class="barra-grafico">
+            <img src="data:image/png;base64,{{ grafico_barras_agresividad }}" alt="Gráfico de agresividad" width="100%">
+        </div>
+        <div class="barra-texto">
+            <p>La agresividad en este contexto no solo se refiere a comportamientos violentos, sino también a una predisposición a reaccionar con ira o frustración desmedida. En el TLP tipo B, la agresividad puede intensificar los conflictos interpersonales, haciendo que las personas afectadas respondan con hostilidad a lo que perciben como provocaciones o rechazos. Esta reactividad emocional agrava la naturaleza volátil de sus relaciones y dificulta la resolución de conflictos.</p>
+            <p style="color: red; font-size: 20px;">Sugerencia:</p>
+            <p>Para reducir respuestas agresivas, es importante identificar los detonantes y practicar técnicas de relajación. La actividad física y la expresión a través del arte u otras actividades creativas pueden ser formas saludables de canalizar y gestionar las emociones intensas.</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('select-año').addEventListener('change', function() {
+            var selectedValue = this.value;
+            var probabilidadValor = document.getElementById('probabilidad-valor');
+            var graficoDona = document.getElementById('grafico-dona');
+            
+            if (selectedValue == '1') {
+                probabilidadValor.textContent = {{ prob_1_año }} + '%';
+                graficoDona.src = 'data:image/png;base64,{{ grafico_dona_1_año }}';
+            } else if (selectedValue == '3') {
+                probabilidadValor.textContent = {{ prob_3_años }} + '%';
+                graficoDona.src = 'data:image/png;base64,{{ grafico_dona_3_años }}';
+            } else if (selectedValue == '5') {
+                probabilidadValor.textContent = {{ prob_5_años }} + '%';
+                graficoDona.src = 'data:image/png;base64,{{ grafico_dona_5_años }}';
+            }
+        });
+    </script>
+</body>
+{% endblock %}

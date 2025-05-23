@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block content %}
+<head>
+    <title>Editar Nivel</title>
+    <link rel="stylesheet" crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .container-form {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f2f2f2;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: auto;
+        }
+
+        /* Aumentar el ancho del formulario */
+        .form-section {
+            width: 70%; /* Ancho del 70% para el formulario */
+        }
+
+        h2 {
+            background-color: #4c2670;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0;
+        }
+
+        .form-container {
+            padding: 20px;
+            background-color: white;
+            border-radius: 0 0 8px 8px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .btn-save {
+            background-color: #28a745;
+            color: white;
+            width: 45%;
+            margin-right: 10px;
+        }
+
+        .btn-cancel {
+            background-color: #dc3545;
+            color: white;
+            width: 45%;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Reducir el ancho de la imagen */
+        .image-container {
+            width: 25%; /* Ancho del 25% para la imagen */
+            text-align: center;
+        }
+
+        /* Ajustar el tamaño de la imagen */
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            max-height: 200px; /* Limitar la altura máxima de la imagen */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-form">
+        <div class="form-section">
+            <h2>Editar Nivel</h2>
+            <div class="form-container">
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="Id">Nivel número:</label>
+                        <input type="text" class="form-control" name="Id" id="Id" value="{{ Nivel_juego.Id }}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="Nombre">Nombre</label>
+                        <input type="text" class="form-control" name="Nombre" id="Nombre" value="{{ Nivel_juego.Nombre }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="Estado">Estado</label>
+                        <select class="form-control" name="Estado" id="Estado">
+                            <option value="Activo" {% if Nivel_juego.Estado == 'Activo' %}selected{% endif %}>Activo</option>
+                            <option value="Inactivo" {% if Nivel_juego.Estado == 'Inactivo' %}selected{% endif %}>Inactivo</option>
+                        </select>
+                    </div>
+                    <div class="buttons">
+                        <button type="submit" class="btn btn-save">Guardar Cambios</button>
+                        <a href="/Niveles/" class="btn btn-cancel">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="image-container">
+            <img src="https://cdn-icons-png.flaticon.com/512/2587/2587054.png" alt="Edit Icon">
+        </div>
+    </div>
+</body>
+{% endblock %}

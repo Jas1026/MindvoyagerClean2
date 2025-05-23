@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% block content %}
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<style>
+    body {
+        background-color: #f5f5f5;
+        font-family: 'Arial', sans-serif;
+    }
+    .profile-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        text-align: center;
+        width: 70%;
+    }
+    .profile-header {
+        background-color: #f1f1f1;
+        border-radius: 10px 10px 0 0;
+        padding: 0px;
+        background-image: url('https://img.freepik.com/vector-gratis/fondo-minimalista-dibujado-mano_23-2148997882.jpg?size=626&ext=jpg&ga=GA1.2.622334270.1724341760&semt=ais_hybrid'); /* Imagen de fondo simulada */
+        background-size: cover;
+        background-position: center;
+        height: 100px;
+    }
+    .profile-img {
+        width: 150px;
+        height: 150px;
+        background-color: #ddd;
+        border-radius: 50%;
+        margin-top: -80px;
+        border: 3px solid white;
+    }
+    .profile-name {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+    .profile-info {
+        text-align: left;
+        margin-top: 20px;
+    }
+    .profile-info p {
+        margin: 5px 0;
+    }
+    .btn-edit {
+        background-color: #6f42c1;
+        color: white;
+        border-radius: 5px;
+        padding: 10px 20px;
+        margin-top: 20px;
+        border: none;
+        cursor: pointer;
+    }
+    .btn-edit:hover {
+        background-color: #5a379b;
+    }
+    /* Estilo para el modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 500px;
+}
+
+</style>
+</head>
+<body>
+<div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="profile-card">
+        <div class="profile-header"></div>
+        {% if role == 'administrativo' %}
+           {% if genero == 'Femenino' %}
+           <img src="https://i.postimg.cc/5y2BDnyy/Diapositiva1-removebg-preview.png" class="profile-img" width="200">
+           {% elif genero == 'Masculino' %}
+           <img src="https://i.postimg.cc/Bb7T3HPg/Diapositiva2.png" class="profile-img" width="200">
+           {% endif %}
+        {% elif role == 'estudiante' %}
+          {% if genero == 'Femenino' %}
+          <img src="https://i.postimg.cc/rFzGJn7Y/Diapositiva4.png" class="profile-img" width="200">
+          {% elif genero == 'Masculino' %}
+          <img src="https://i.postimg.cc/8kZBLQX6/Diapositiva3.png" class="profile-img" width="200">
+          {% endif %}
+        {% endif %}
+        
+        
+        <div class="profile-name">{{username}}</div>
+        <div class="profile-info">
+            <p><strong>Rol:</strong> {{ role }}</p>
+            <p><strong>Genero:</strong> {{ genero }}</p>
+            <p><strong>Número de teléfono:</strong> {{Telefono}}</p>
+            <p><strong>Correo electrónico:</strong> {{ Gmail }} </p>
+            <p><strong>Dirección:</strong> {{ Direccion }}</p>
+        </div>
+        <button onclick="openEditModal()" class="btn-edit">EDITAR PERFIL</button>
+    </div>
+</div>
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <h4>Editar Perfil</h4>
+        <form id="editProfileForm">
+            <div class="form-group">
+                <label for="telefonoInput">Número de teléfono:</label>
+                <input type="text" id="telefonoInput" class="form-control" value="{{ Telefono }}">
+            </div>
+            <div class="form-group">
+                <label for="gmailInput">Correo electrónico:</label>
+                <input type="email" id="gmailInput" class="form-control" value="{{ Gmail }}">
+            </div>
+            <div class="form-group">
+                <label for="direccionInput">Dirección:</label>
+                <input type="text" id="direccionInput" class="form-control" value="{{ Direccion }}">
+            </div>
+            <button type="button" class="btn btn-success" onclick="saveProfileChanges()">Guardar</button>
+            <button type="button" class="btn btn-danger" onclick="closeEditModal()">Cancelar</button>
+        </form>
+    </div>
+</div>
+<script>
+    // Abrir modal
+    function openEditModal() {
+        document.getElementById("editModal").style.display = "flex";
+    }
+
+    // Cerrar modal
+    function closeEditModal() {
+        document.getElementById("editModal").style.display = "none";
+    }
+
+    // Guardar cambios en Firebase
+    function saveProfileChanges() {
+        const telefono = document.getElementById("telefonoInput").value;
+        const gmail = document.getElementById("gmailInput").value;
+        const direccion = document.getElementById("direccionInput").value;
+
+        // Enviar datos al backend usando fetch
+        fetch("{% url 'update_profile' %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                Telefono: telefono,
+                Gmail: gmail,
+                Direccion: direccion
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Actualizar los valores en el perfil
+                location.reload();
+            } else {
+                alert("Error al actualizar el perfil");
+            }
+        });
+    }
+</script>
+<!-- Enlace a JavaScript de Bootstrap (opcional) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+{% endblock %}

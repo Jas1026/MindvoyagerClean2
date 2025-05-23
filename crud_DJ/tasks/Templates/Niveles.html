@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Filtro para mostrar niveles activos o inactivos -->
+    <form method="GET" action="" class="mb-4">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <label for="estadoFiltro" class="input-group-text">Filtrar por estado:</label>
+                    <select class="form-select" name="estado" id="estadoFiltro" onchange="this.form.submit()">
+                        <option value="">Mostrar todos</option>
+                        <option value="Activo" {% if estado == 'Activo' %}selected{% endif %}>Activos</option>
+                        <option value="Inactivo" {% if estado == 'Inactivo' %}selected{% endif %}>Inactivos</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </form>
+   
+
+    <div class="row">
+        <!-- Ciclo para mostrar los niveles filtrados -->
+        {% for Nivel_juego in Niveles_juego %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header text-white bg-purple">
+                        <h5 class="mb-0">{{ Nivel_juego.Nombre }}</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text"><strong>Estado:</strong> {{ Nivel_juego.Estado }}</p>
+                        <div class="d-flex justify-content-center">
+                            <a href="/updatecar/{{ Nivel_juego.Id }}" class="btn btn-edit btn-sm">Editar</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<link rel="stylesheet" crossorigin="anonymous"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css">
+
+<script crossorigin="anonymous"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js">
+</script>
+
+<style>
+    .bg-purple {
+        background-color: #4c146f; /* Color morado */
+    }
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+    .card-header {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    .btn-edit {
+        width: 50%;
+        background-color: #b06d00; /* Color similar al botón en la imagen */
+        color: white;
+    }
+    .btn-edit:hover {
+        background-color: #b06d00; /* Un tono más oscuro para el efecto hover */
+        color: white;
+    }
+    .nav-link {
+        font-size: 1.2rem;
+        color: #6c757d;
+        margin: 0 10px;
+        padding: 12px 24px;
+        text-align: center;
+        background-color: #f2f2f2;
+        border-radius: 12px;
+        transition: background-color 0.3s ease, color 0.3s ease;
+        display: block;
+        border: 1px solid transparent;
+    }
+</style>
+{% endblock %}

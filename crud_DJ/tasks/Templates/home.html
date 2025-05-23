@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-5 bg-light-purple">
+    <div class="alert" role="alert">
+        <h2 class="alert-heading">¡Bienvenid@ a MINDVOYAGER!</h2>
+        <p>Te damos la bienvenida a nuestra plataforma que incluye un sistema predictivo avanzado y un emocionante videojuego interactivo. ¡Explora todas las funcionalidades que hemos creado para ti!</p>
+        <hr>
+        <p class="mb-0">Para acceder, por favor inicia sesión con tu cuenta de Gmail y tu contraseña. Asegúrate de seleccionar tu rol correspondiente: <strong>Estudiante</strong> o <strong>Administrativo</strong>.</p>
+    </div>
+</div>
+
+<style>
+    .bg-light-purple {
+        background-color: #f3e6f5; /* Lila pastel muy suave */
+        padding: 20px;
+        border-radius: 10px;
+    }
+</style>
+<script src="https://www.google.com/recaptcha/api.js?render=explicit&debug" async defer></script>
+{% endblock %}
